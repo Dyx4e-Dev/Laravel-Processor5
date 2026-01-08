@@ -20,6 +20,15 @@
     </div>
 </section>
 
+<script>
+const benchmarkData = {};
+const benchmarkResults = @json($benchmark);
+
+@foreach($benchmark as $b)
+benchmarkData['{{ strtolower(str_replace(' ', '-', $b->name)) }}'] = @json($b->scores);
+@endforeach
+</script>
+
 <div class="benchmark-results-popup" id="benchmarkPopup">
     <div class="benchmark-results-content">
 

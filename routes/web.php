@@ -4,12 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\RecommendationController;
 use App\Http\Controllers\Admin\WebSettingController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\GlossaryController;
 use App\Http\Controllers\Admin\BenchmarkController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuizResultController;
+use App\Http\Controllers\Admin\AdminActivityLogController;
 use App\Http\Controllers\FrontendController;
 
 
@@ -28,6 +30,9 @@ Route::get('/', [FrontendController::class, 'index']);
 Route::post('/', [FrontendController::class, 'submitQuiz']);
 Route::post('/submit-quiz', [FrontendController::class, 'submitQuiz']);
 
+// Endpoint untuk rekomendasi laptop berdasarkan skor
+Route::post('/recommend', [FrontendController::class, 'recommend']);
+
 /*
 |--------------------------------------------------------------------------
 | BACKEND - ADMIN
@@ -42,10 +47,18 @@ Route::prefix('admin')->group(function () {
 
     // Dashboard 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard/filter-chart', [DashboardController::class, 'filterChart']);
 
     // Settings Routes
     Route::get('/settings', [WebSettingController::class, 'index'])->name('admin.settings');
     Route::post('/settings', [WebSettingController::class, 'update'])->name('admin.settings.update');
+
+    //Recommendatons Routes
+    Route::get('/recommendations', [RecommendationController::class, 'index'])->name('admin.recommendation');
+    Route::post('/recommendations', [RecommendationController::class, 'store'])->name('admin.recommendation.store');
+    Route::put('/recommendations/{id}', [RecommendationController::class, 'update'])->name('admin.recommendation.update');
+    Route::delete('/recommendations/{id}', [RecommendationController::class, 'destroy'])->name('admin.recommendation.destroy');
+
 
     // Teams Routes
     Route::get('/team', [TeamController::class, 'index'])->name('admin.team');
@@ -72,9 +85,16 @@ Route::prefix('admin')->group(function () {
 
     // Benchmark Routes
     Route::get('/benchmark', [BenchmarkController::class, 'index'])->name('admin.benchmark');
-    Route::post('/benchmark/{id}', [BenchmarkController::class, 'storeOrUpdate'])->name('admin.benchmark.update');
-    Route::post('/benchmark', [BenchmarkController::class, 'store'])->name('admin.benchmark.store');
-    Route::delete('/benchmark/{id}', [BenchmarkController::class, 'destroy'])->name('admin.benchmark.destroy');
+    // Route untuk halaman edit (yang menyebabkan error tadi)
+    Route::get('/benchmark/{id}/edit', [BenchmarkController::class, 'edit'])->name('benchmarks.edit');
+
+    // Route untuk proses update (dibutuhkan nanti)
+    Route::put('/benchmark/{id}', [BenchmarkController::class, 'update'])->name('benchmarks.update');
+
+    // Activity Logs Routes
+    Route::get('/log_aktivitas', [AdminActivityLogController::class, 'index'])->name('admin.activity_logs');
+    Route::post('/log_aktivitas/clear', [AdminActivityLogController::class, 'destroy'])->name('admin.activity_logs.destroy');
+    Route::get('/log_aktivitas/{id}', [AdminActivityLogController::class, 'show'])->name('admin.activity_logs.show');
 
 
 });

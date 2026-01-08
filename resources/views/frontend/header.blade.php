@@ -1,7 +1,9 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">{{$webSetting->title}}</div>
+                <div class="logo">
+                   <img src="{{ asset('img/logo/logo.png') }}" alt="logo" style="height: 5rem;">
+                </div>
                 <ul class="nav-links">
                     <li><a href="#analogy">Analogi</a></li>
                     <li><a href="#benchmark">Benchmark</a></li>

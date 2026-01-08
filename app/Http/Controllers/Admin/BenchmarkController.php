@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Benchmark;
 use App\Models\BenchmarkResult;
 use App\Models\BestCpu;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BenchmarkController extends Controller
 {
@@ -37,42 +39,60 @@ public function store(Request $request)
     return redirect()->back()->with('success', 'Benchmark created successfully!');
 }
 
-public function destroy($id)
-{
-    $benchmark = Benchmark::findOrFail($id);
-    // Hapus relasi terlebih dahulu jika tidak ada cascade delete di database
-    $benchmark->result()->delete();
-    $benchmark->bestCpus()->delete();
-    $benchmark->delete();
 
-    return redirect()->back()->with('success', 'Benchmark deleted successfully!');
+   public function edit($id)
+{
+    $benchmark = Benchmark::with(['result', 'bestCpus'])->findOrFail($id);
+    
+    // Memanggil view > backend > edit_benchmark.blade.php
+    return view('backend.edit_benchmark', compact('benchmark'));
 }
-    public function storeOrUpdate(Request $request, $id)
-{
-    // 1. Update Scores pada Benchmark
-    $benchmark = Benchmark::findOrFail($id);
-    $benchmark->update(['scores' => $request->scores]);
 
-    // 2. Update Narasi (Result)
-    $benchmark->result()->updateOrCreate(
-        ['benchmark_id' => $id],
-        [
-            'best_core' => $request->best_core,
-            'analysis'  => $request->analysis
-        ]
-    );
+    public function update(Request $request, $id)
+    {
+        $benchmark = Benchmark::findOrFail($id);
 
-    // 3. Update Best CPUs (Sync)
-    $benchmark->bestCpus()->delete();
-    foreach ($request->cpus as $cpu) {
-        if ($cpu['name']) {
-            $benchmark->bestCpus()->create([
-                'cpu_name'    => $cpu['name'],
-                'description' => $cpu['desc']
-            ]);
-        }
+        $request->validate([
+            'scores' => 'nullable|array',
+            'scores.*' => 'nullable|numeric',
+            'best_core' => ['required', Rule::in([1,2,4,6,8,12,16])],
+            'core_description' => 'nullable|string',
+            'analysis_text' => 'nullable|string',
+            'recommended_cpu' => 'nullable|array',
+            'recommended_cpu.*' => 'nullable|string|max:255',
+            'cpu_descriptions' => 'nullable|array',
+            'cpu_descriptions.*' => 'nullable|string',
+        ]);
+
+        DB::transaction(function() use ($request, $benchmark) {
+            if ($request->has('scores')) {
+                $benchmark->scores = $request->input('scores');
+                $benchmark->save();
+            }
+
+            $benchmark->result()->updateOrCreate(
+                ['benchmark_id' => $benchmark->id],
+                [
+                    'best_core' => $request->input('best_core'),
+                    'desc_core' => $request->input('core_description'),
+                    'analysis' => $request->input('analysis_text'),
+                ]
+            );
+
+            // Sync best CPUs: delete existing then create new
+            $benchmark->bestCpus()->delete();
+            $cpus = $request->input('recommended_cpu', []);
+            $descs = $request->input('cpu_descriptions', []);
+            foreach ($cpus as $index => $cpuName) {
+                if ($cpuName === null || trim($cpuName) === '') continue;
+                $description = $descs[$index] ?? '';
+                $benchmark->bestCpus()->create([
+                    'cpu_name' => $cpuName,
+                    'description' => $description,
+                ]);
+            }
+        });
+
+        return redirect()->route('admin.benchmark')->with('success', 'Analisis berhasil diperbarui!');
     }
-
-    return back()->with('success', 'Benchmark configuration updated!');
-}
 }

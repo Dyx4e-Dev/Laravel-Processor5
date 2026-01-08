@@ -6,10 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class BenchmarkResult extends Model
 {
-    protected $fillable = ['nama', 'email', 'team_id', 'score'];
+    protected $fillable = [
+        'benchmark_id',
+        'best_core',
+        'desc_core',
+        'analysis',
+    ];
 
-    public function team()
+    public function benchmark()
     {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(Benchmark::class);
     }
+
 }

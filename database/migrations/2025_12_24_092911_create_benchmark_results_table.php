@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('benchmark_results', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->string('email');
-            $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('set null');
-            $table->integer('score')->nullable();
+            $table->foreignId('benchmark_id')->constrained('benchmarks');
+            $table->string('best_core');
+            $table->string('desc_core');
+            $table->text('analysis');
             $table->timestamps();
         });
     }

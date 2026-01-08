@@ -1,0 +1,8 @@
+- [x] Refactor Hero Section into modern, interactive parallax landing section
+  - [x] Update hero.blade.php structure with parallax layers
+  - [x] Add parallax CSS styles to style.css
+  - [x] Implement parallax JavaScript logic in script.js
+- [ ] Update FrontendController@recommend to return all relevant laptops instead of first()
+- [ ] Update JavaScript getRecommendation function to handle multiple laptops with prev/next navigation
+- [ ] Add CSS styles for the laptop carousel/navigation if needed
+- [ ] Test the functionality

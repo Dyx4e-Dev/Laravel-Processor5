@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('laptops', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('photo')->nullable();
+            $table->string('brand');
+            $table->string('processor');
+            $table->string('ram');
+            $table->string('storage');
+            $table->string('vga');
+            $table->string('screen_size');
+            $table->decimal('price', 15, 2);
+            $table->json('recommendation'); // Array of usage types: ['gaming', 'productivity', 'content-creation', 'programming']
+            $table->enum('app_usage', ['single-threaded', 'multi-threaded']); // Application type
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('laptops');
+    }
+};

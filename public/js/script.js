@@ -14,30 +14,7 @@ let timeInterval = null;
 let loadingDotsInterval = null;
 let loadingDotCount = 0;
 
-// Data benchmark untuk chart & popup hasil
-const benchmarkData = {
-    gaming: {
-        '1 Core': 45,
-        '2 Cores': 65,
-        '4 Cores': 85,
-        '6 Cores': 95,
-        '8 Cores': 100
-    },
-    'video-editing': {
-        '1 Core': 20,
-        '2 Cores': 40,
-        '4 Cores': 70,
-        '6 Cores': 90,
-        '8 Cores': 100
-    },
-    'web-browsing': {
-        '1 Core': 60,
-        '2 Cores': 80,
-        '4 Cores': 95,
-        '6 Cores': 98,
-        '8 Cores': 100
-    }
-};
+// Data benchmark untuk chart & popup hasil - now loaded from database
 
 // Elemen DOM utama
 const singleQueueElement = document.getElementById('single-queue');
@@ -446,12 +423,11 @@ function formatWorkload(w) {
 }
 
 function buildBestCoreReco(workload) {
-    const reco = {
-        gaming: "6 Core — Sweet spot untuk FPS modern, performa tinggi dengan efisiensi harga.",
-        "video-editing": "8 Core — Skalabilitas terbaik untuk rendering & encoding.",
-        "web-browsing": "4 Core — Optimal untuk multitasking ringan tanpa pemborosan daya."
-    };
-    return `<p>${reco[workload]}</p>`;
+    const benchmark = benchmarkResults.find(b => b.name.toLowerCase() === workload.replace('-', ' '));
+    if (benchmark && benchmark.result) {
+        return `<p>${benchmark.result.best_core}</p>`;
+    }
+    return `<p>Data tidak tersedia</p>`;
 }
 
 function buildCoreComparison(results) {
@@ -474,32 +450,18 @@ function buildCoreComparison(results) {
 
 
 function buildCPUReco(workload) {
-    const reco = {
-        gaming: [
-            { cpu: "Ryzen 5 7600X", reason: "IPC tinggi & clock kencang ideal untuk FPS." },
-            { cpu: "Intel Core i5-13600K", reason: "Single-core terkuat di kelas mid-range." },
-            { cpu: "Ryzen 5 5600X", reason: "Value terbaik untuk budget gaming." }
-        ],
-        "video-editing": [
-            { cpu: "Ryzen 7 7700X", reason: "Multi-core kuat untuk rendering intens." },
-            { cpu: "Intel Core i7-13700K", reason: "Core banyak cocok untuk encode/export." },
-            { cpu: "Ryzen 9 7900X", reason: "Performa workstation tanpa harga ekstrem." }
-        ],
-        "web-browsing": [
-            { cpu: "Ryzen 3 5300G", reason: "Sangat efisien dan cukup untuk kantor/browsing." },
-            { cpu: "Intel Core i3-13100", reason: "Responsif dan stabil untuk penggunaan ringan." },
-            { cpu: "Ryzen 5 5600G", reason: "APU serbaguna dengan performa solid." }
-        ]
-    };
-
-    return reco[workload]
-        .map(r => `
-            <div class="cpu-item">
-                <div class="cpu-name">${r.cpu}</div>
-                <div class="cpu-reason">${r.reason}</div>
-            </div>
-        `)
-        .join("");
+    const benchmark = benchmarkResults.find(b => b.name.toLowerCase() === workload.replace('-', ' '));
+    if (benchmark && benchmark.best_cpus) {
+        return benchmark.best_cpus
+            .map(r => `
+                <div class="cpu-item">
+                    <div class="cpu-name">${r.cpu_name}</div>
+                    <div class="cpu-reason">${r.description}</div>
+                </div>
+            `)
+            .join("");
+    }
+    return `<p>Data rekomendasi CPU tidak tersedia</p>`;
 }
 
 function buildAnalysis(workload) {
@@ -738,59 +700,159 @@ function closeResultsPopup(button) {
 // REKOMENDASI
 // ==========================
 
-// Mendapatkan rekomendasi CPU berdasarkan jawaban kuis
+// Global variables for laptop recommendations
+let currentLaptopIndex = 0;
+let laptopRecommendations = [];
+
+// Mendapatkan rekomendasi laptop berdasarkan jawaban kuis
 function getRecommendation() {
-    const answers = { usage: null, budget: null, applications: null };
+    const answers = { usage: [], budget: null, app_usage: null };
+
     document.querySelectorAll('.quiz-question').forEach((question, index) => {
-        const selectedOption = question.querySelector('.quiz-option.selected');
-        if (selectedOption) {
-            if (index === 0) answers.usage = selectedOption.dataset.value;
-            else if (index === 1) answers.budget = selectedOption.dataset.value;
-            else if (index === 2) answers.applications = selectedOption.dataset.value;
+        if (index === 0) {
+            // Question 1: Multiple selection for usage
+            const selectedOptions = question.querySelectorAll('.quiz-option.selected');
+            selectedOptions.forEach(option => {
+                answers.usage.push(option.dataset.value);
+            });
+        } else if (index === 1) {
+            // Question 2: Single selection for budget
+            const selectedOption = question.querySelector('.quiz-option.selected');
+            if (selectedOption) {
+                answers.budget = selectedOption.dataset.value;
+            }
+        } else if (index === 2) {
+            // Question 3: Single selection for app_usage
+            const selectedOption = question.querySelector('.quiz-option.selected');
+            if (selectedOption) {
+                answers.app_usage = selectedOption.dataset.value;
+            }
         }
     });
+
     // Validasi jawaban
-    if (!answers.usage || !answers.budget || !answers.applications) {
+    if (answers.usage.length === 0 || !answers.budget || !answers.app_usage) {
         showNotification('Silakan jawab semua pertanyaan terlebih dahulu!', 'warning');
         return;
     }
-    let recommendation = '';
-    let title = '';
-    let icon = '💡';
-    // Rekomendasi berdasarkan jawaban
-    if (answers.usage === 'gaming') {
-        title = 'Rekomendasi: CPU dengan Single-Core Performance Tinggi';
-        recommendation = 'Untuk gaming, kinerja single-core yang tinggi lebih penting daripada jumlah core. Pilih CPU dengan clock speed tinggi dan IPC (Instructions Per Cycle) yang baik. CPU dengan 6-8 core biasanya sudah cukup untuk sebagian besar game.';
-        icon = '🎮';
-    } else if (answers.usage === 'content-creation') {
-        title = 'Rekomendasi: CPU Multi-Core dengan Banyak Core';
-        recommendation = 'Untuk konten kreatif seperti video editing dan 3D rendering, CPU dengan banyak core akan memberikan performa yang jauh lebih baik. Carilah CPU dengan setidaknya 8 core, atau lebih jika budget memungkinkan.';
-        icon = '🎨';
-    } else if (answers.usage === 'programming') {
-        title = 'Rekomendasi: CPU dengan Keseimbangan Single dan Multi-Core';
-        recommendation = 'Untuk programming, Anda membutuhkan keseimbangan antara single-core performance untuk IDE dan tools development, serta multi-core performance untuk kompilasi kode dan menjalankan multiple services. CPU dengan 6-12 core adalah pilihan yang baik.';
-        icon = '💻';
-    } else {
-        title = 'Rekomendasi: CPU dengan Keseimbangan yang Baik';
-        recommendation = 'Untuk penggunaan produktivitas umum, carilah CPU yang menawarkan keseimbangan antara single-core performance dan jumlah core. CPU dengan 4-8 core biasanya sudah lebih dari cukup untuk kebutuhan office dan browsing.';
-        icon = '⚖️';
-    }
-    // Rekomendasi berdasarkan budget
-    if (answers.budget === 'low') {
-        recommendation += ' Dengan budget terbatas, pertimbangkan CPU entry-level dengan 4-6 core yang menawarkan value terbaik.';
-    } else if (answers.budget === 'medium') {
-        recommendation += ' Dengan budget menengah, Anda dapat mempertimbangkan CPU mid-range dengan 6-8 core yang menawarkan performa yang seimbang.';
-    } else if (answers.budget === 'high') {
-        recommendation += ' Dengan budget tinggi, Anda dapat memilih CPU high-end dengan 12+ core untuk performa maksimal dalam semua scenario.';
-    }
+
+    // Kirim request ke backend untuk mendapatkan rekomendasi laptop
+    fetch('/recommend', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            budget: answers.budget,
+            usage: answers.usage,
+            app_usage: answers.app_usage
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.laptops && data.laptops.length > 0) {
+            laptopRecommendations = data.laptops;
+            currentLaptopIndex = 0;
+            displayLaptopRecommendation();
+        } else {
+            recommendationResult.innerHTML = `
+                <h3>😔 Tidak ada rekomendasi yang cocok</h3>
+                <p>Maaf, tidak ada laptop yang sesuai dengan kriteria Anda saat ini. Silakan coba kombinasi jawaban yang berbeda.</p>
+            `;
+        }
+        recommendationResult.classList.add('show');
+        recommendationResult.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Terjadi kesalahan saat mengambil rekomendasi. Silakan coba lagi.', 'error');
+    });
+}
+
+// Menampilkan rekomendasi laptop dengan navigasi
+function displayLaptopRecommendation() {
+    const laptop = laptopRecommendations[currentLaptopIndex];
+    const totalLaptops = laptopRecommendations.length;
+
     recommendationResult.innerHTML = `
-        <h3>${icon} ${title}</h3>
-        <p>${recommendation}</p>
+        <div class="core-display-card">
+            <div class="display-header">
+                <span class="rank-badge">RECOMMENDATION ${currentLaptopIndex + 1}/${totalLaptops}</span>
+                <h2 class="laptop-title-gradient">${laptop.name}</h2>
+            </div>
+
+            <div class="display-content">
+                
+                <div class="visual-engine">
+                    <button id="prev-laptop" class="nav-btn-cyber" ${currentLaptopIndex === 0 ? 'disabled' : ''}>
+                        <i class='bx bx-chevron-left'></i>
+                    </button>
+                    
+                    <div class="laptop-frame">
+                        ${laptop.photo 
+                            ? `<img src="${laptop.photo}" alt="${laptop.name}">` 
+                            : `<div class="no-img-cyber"><i class='bx bx-laptop'></i></div>`}
+                    </div>
+
+                    <button id="next-laptop" class="nav-btn-cyber" ${currentLaptopIndex === totalLaptops - 1 ? 'disabled' : ''}>
+                        <i class='bx bx-chevron-right'></i>
+                    </button>
+                </div>
+
+                <div class="specs-cyber-grid">
+                    <div class="grid-cell">
+                        <label>Brand</label>
+                        <p>${laptop.brand}</p>
+                    </div>
+                    <div class="grid-cell">
+                        <label>Processor</label>
+                        <p>${laptop.processor}</p>
+                    </div>
+                    <div class="grid-cell">
+                        <label>Memory (RAM)</label>
+                        <p>${laptop.ram}</p>
+                    </div>
+                    <div class="grid-cell">
+                        <label>Storage</label>
+                        <p>${laptop.storage}</p>
+                    </div>
+                    <div class="grid-cell">
+                        <label>Graphics</label>
+                        <p>${laptop.vga}</p>
+                    </div>
+                    <div class="grid-cell">
+                        <label>Screen Size</label>
+                        <p>${laptop.screen_size}</p>
+                    </div>
+                </div>
+
+                <div class="price-neon-container">
+                    <div class="price-tag">
+                        <small>ESTIMATED PRICE</small>
+                        <h3>Rp ${parseFloat(laptop.price).toLocaleString('id-ID')}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
-    recommendationResult.classList.add('show');
-    recommendationResult.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
+
+    // Add event listeners for navigation buttons
+    document.getElementById('prev-laptop').addEventListener('click', () => {
+        if (currentLaptopIndex > 0) {
+            currentLaptopIndex--;
+            displayLaptopRecommendation();
+        }
+    });
+
+    document.getElementById('next-laptop').addEventListener('click', () => {
+        if (currentLaptopIndex < totalLaptops - 1) {
+            currentLaptopIndex++;
+            displayLaptopRecommendation();
+        }
     });
 }
 
@@ -1259,8 +1321,16 @@ function initializeEventListeners() {
         option.addEventListener('click', function () {
             const parent = this.parentElement;
             if (!parent) return;
-            parent.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
+
+            // Check if parent has 'multiple' class for multiple selection
+            if (parent.classList.contains('multiple')) {
+                // Toggle selection for multiple choice
+                this.classList.toggle('selected');
+            } else {
+                // Single selection: remove selected from all, add to current
+                parent.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            }
         });
     });
 
@@ -1307,6 +1377,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateChart = initializeBenchmarkChart();
     initializeGlossary();
     initializeEventListeners();
+    initializeParallax();
     updateCustomerCounts();
     updateTimeDisplays();
     hideLoadingScreen();
@@ -1419,6 +1490,45 @@ const teamSwiper = new Swiper('.team-swiper', {
     }
 });
 
+// ==========================
+// PARALLAX HERO SECTION
+// ==========================
+
+// Inisialisasi parallax effect untuk hero section
+function initializeParallax() {
+    const parallaxLayers = document.querySelectorAll('.parallax-layer');
+
+    if (parallaxLayers.length === 0) return;
+
+    // Fungsi untuk update posisi parallax berdasarkan scroll
+    function updateParallax() {
+        const scrolled = window.pageYOffset;
+        const rate = scrolled * -0.5;
+
+        parallaxLayers.forEach((layer, index) => {
+            // Berikan speed berbeda untuk setiap layer
+            const speed = (index + 1) * 0.1; // layer 1: 0.1, layer 2: 0.2, dst
+            const yPos = -(scrolled * speed);
+            layer.style.transform = `translateY(${yPos}px)`;
+        });
+    }
+
+    // Throttle scroll event untuk performa yang lebih baik
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                updateParallax();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    // Initial call
+    updateParallax();
+}
+
 // Event listeners untuk navigasi dengan klik pada foto
 document.addEventListener('click', function(event) {
     const memberImageWrapper = event.target.closest('.member-image-wrapper');
@@ -1442,7 +1552,7 @@ document.addEventListener('click', function(event) {
     // Jika klik slide di kanan (index lebih besar dari aktif), slide ke kanan
     if (currentIndex > activeIndex) {
         teamSwiper.slideNext();
-    } 
+    }
     // Jika klik slide di kiri (index lebih kecil dari aktif), slide ke kiri
     else if (currentIndex < activeIndex) {
 

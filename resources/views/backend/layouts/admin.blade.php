@@ -23,8 +23,8 @@
 
     <div class="dashboard-container">
         <aside class="sidebar reveal">
-            <div class="logo">
-                <h1>{{ $webSetting->title }}</h1>
+            <div class="logo" style="text-align: center; padding:0;">
+                 <img src="{{ asset('img/logo/logo.png') }}" alt="logo" style="height: 5rem;">
             </div>
             
             <nav class="menu">
@@ -48,8 +48,8 @@
                         </a>
                     </li>
 
-                    <li class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                        <a href="{{ route('admin.settings') }}">
+                    <li class="{{ request()->routeIs('admin.recommendation') ? 'active' : '' }}">
+                        <a href="{{ route('admin.recommendation') }}">
                             <i class='bx bxs-like'></i> Recommendation
                         </a>
                     </li>
@@ -75,6 +75,12 @@
                     <li class="{{ request()->routeIs('admin.team') ? 'active' : '' }}">
                         <a href="{{ route('admin.team') }}">
                             <i class='bx bxs-group'></i> Team
+                        </a>
+                    </li>
+
+                    <li class="{{ request()->routeIs('admin.activity_logs.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.activity_logs') }}">
+                            <i class='bx bxs-file'></i> Log Aktivitas
                         </a>
                     </li>
                 </ul>

@@ -1,7 +1,9 @@
     <footer>
         <div class="container reveal">
             <div class="footer-content">
-                <div class="logo">Kelompok 5</div>
+                <div class="logo">
+                     <img src="{{ asset('img/logo/logo.png') }}" alt="logo" style="height: 5rem;">
+                </div>
                 <ul class="footer-links">
                     <li><a href="#analogy">Analogi</a></li>
                     <li><a href="#benchmark">Benchmark</a></li>
