@@ -9,7 +9,7 @@
                     <li><a href="#benchmark">Benchmark</a></li>
                     <li><a href="#recommendation">Rekomendasi</a></li>
                     <li><a href="#glossary">Glosarium</a></li>
-                    <li><a href="#team">team</a></li>
+                    <li><a href="#team">Team</a></li>
                 </ul>
                 <p>&copy; 2025 Pentacore. All rights reserved.</p>
             </div>

@@ -14,7 +14,7 @@
                 <div id="benchmark-chart"></div>
             </div>
             <div class="benchmark-explanation reveal">
-                <p>Benchmark ini mensimulasikan bagaimana performa CPU dengan jumlah core yang berbeda dalam menangani berbagai jenis workload. Perhatikan bahwa workload yang dapat diparalelkan (seperti rendering video) akan mendapatkan manfaat lebih besar dari core yang lebih banyak.</p>
+                <p class="text-white">Benchmark ini mensimulasikan bagaimana performa CPU dengan jumlah core yang berbeda dalam menangani berbagai jenis workload. Perhatikan bahwa workload yang dapat diparalelkan (seperti rendering video) akan mendapatkan manfaat lebih besar dari core yang lebih banyak.</p>
             </div>
         </div>
     </div>

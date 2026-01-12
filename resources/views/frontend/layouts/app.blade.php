@@ -30,14 +30,12 @@
     @include('frontend.header')
     <!-- hero -->
     @include('frontend.hero')
-    <!-- hero -->
-    @include('frontend.support')
     <!-- analogy -->
     @include('frontend.analogy')
     <!-- benchmark -->
     @include('frontend.benchmark')
     <!-- recommendation -->
-    @include('frontend.recomendation')
+    @include('frontend.recommendation')
     <!-- team -->
     @include('frontend.team')
     <!-- quiz -->
