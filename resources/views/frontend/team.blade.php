@@ -29,7 +29,7 @@
             </div>
 
             <div class="analogy-explanation reveal">
-                <p>Tim kami bekerja secara kolaboratif dengan pembagian peran yang jelas. Setiap anggota berkontribusi sesuai keahliannya, sehingga proses kerja berjalan efisien dan hasil yang dihasilkan tetap optimal.</p>
+                <p class="text-white">Tim kami bekerja secara kolaboratif dengan pembagian peran yang jelas. Setiap anggota berkontribusi sesuai keahliannya, sehingga proses kerja berjalan efisien dan hasil yang dihasilkan tetap optimal.</p>
             </div>
             
         </div>

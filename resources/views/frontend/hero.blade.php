@@ -1,6 +1,6 @@
 <section class="hero parallax">
     <!-- Background Layer (Parallax) -->
-    <div class="hero-bg parallax-bg"></div>
+    <div class="hg parallax-bg"></div>
 
     <!-- Floating Particles -->
         <div class="floating-particles" id="floating-particles"></div>

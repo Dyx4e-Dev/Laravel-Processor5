@@ -49,25 +49,34 @@ const glossaryTerms = document.querySelectorAll('.glossary-term');
 // NOTIFICATIONS 
 // ========================== 
 
-function showNotification(message, type = 'info') { 
-    const notification = document.createElement('div'); 
-    notification.className = `notification ${type}`; 
-    notification.textContent = message; 
-    document.body.appendChild(notification); 
-    setTimeout(() => { 
-        notification.classList.add('show'); 
-        notification.classList.add('pulse'); 
-    }, 10); 
-    setTimeout(() => { 
-        notification.classList.remove('show', 'pulse'); 
-        notification.classList.add('hide'); 
-        setTimeout(() => { 
-            if (document.body.contains(notification)) { 
-                document.body.removeChild(notification); 
-            } 
-        }, 600); 
-    }, 4000); 
-} 
+window.notify = function(type, message) {
+    const area = document.getElementById('notification-area');
+    if (!area) return;
+
+    const toast = document.createElement('div');
+    toast.className = `notif ${type}`;
+
+    const iconMap = {
+        success: 'bx-check-circle',
+        warning: 'bx-error-circle',
+        error: 'bx-x-circle',
+        info: 'bx-info-circle'
+    };
+
+    const icon = iconMap[type] || iconMap.info;
+
+    toast.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+            <i class="bx ${icon} notif-icon"></i>
+            <span class="notif-text">${message}</span>
+        </div>
+    `;
+
+    area.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 3500);
+};
+
 
 // ========================== 
 // ANALOGY SIMULATION 
@@ -76,7 +85,7 @@ function showNotification(message, type = 'info') {
 // Menambah pelanggan ke antrian 
 function addCustomer() { 
     if (simulationRunning) { 
-        showNotification('Simulasi sedang berjalan! Tunggu hingga selesai.', 'warning'); 
+        notify('warning', 'Simulasi sedang berjalan! Tunggu hingga selesai.');
         return; 
     } 
     customerId++; 
@@ -126,7 +135,7 @@ function updateTimeDisplays() {
 // Memulai simulasi 
 function startSimulation() { 
     if (singleCustomers.length === 0) { 
-        showNotification('Tidak ada pelanggan! Silakan tambah pelanggan terlebih dahulu.', 'warning'); 
+        notify('warning', 'Tidak ada pelanggan! Silakan tambah pelanggan terlebih dahulu.');
         return; 
     } 
     if (simulationRunning) return; 
@@ -221,20 +230,24 @@ function checkSimulationComplete() {
 // Menampilkan hasil perbandingan simulasi 
 function showComparisonResult() { 
     const efficiency = ((singleTime - multiTime) / singleTime * 100).toFixed(1); 
+
     let message = ''; 
     let type = 'info'; 
+
     if (multiTime < singleTime) { 
         message = `Multi-core ${efficiency}% lebih cepat!\n⏱️ Single: ${singleTime}s | ⏱️ Multi: ${multiTime}s`; 
         type = 'success'; 
     } else if (multiTime > singleTime) { 
         message = `Single-core ${Math.abs(efficiency)}% lebih cepat!\n⏱️ Single: ${singleTime}s | ⏱️ Multi: ${multiTime}s`; 
-        type = 'info'; 
+        type = 'success'; 
     } else { 
         message = `Kedua arsitektur sama cepat!\n⏱️ Waktu: ${singleTime}s`; 
         type = 'info'; 
     } 
-    showNotification(message, type); 
-} 
+
+    notify(type, message); 
+}
+
 
 // Mereset simulasi 
 function resetSimulation() { 
@@ -450,23 +463,35 @@ function initializeBenchmarkChart() {
 
         const labels = g.selectAll(".label").data(data, d => d.core);
 
-        labels.exit().remove();
+        labels.exit()
+            .transition()
+            .duration(400)
+            .attr("y", height)
+            .style("opacity", 0)
+            .remove();
 
-        labels.enter()
+        const enterLabels = labels.enter()
             .append("text")
             .attr("class", "label")
             .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
+            .attr("dominant-baseline", "auto")
             .style("fill", "#fff")
             .style("font-size", "12px")
             .style("font-weight", "600")
-            .merge(labels)
+            .style("opacity", 0)
+            .attr("x", d => xScale(d.core) + xScale.bandwidth() / 2)
+            .attr("y", height);
+
+        enterLabels.merge(labels)
             .transition()
             .duration(800)
             .ease(d3.easeCubicInOut)
+            .delay((_, i) => i * 80)
+            .style("opacity", 1)
             .attr("x", d => xScale(d.core) + xScale.bandwidth() / 2)
-            .attr("y", d => yScale(d.performance) + (height - yScale(d.performance)) / 2)
+            .attr("y", d => yScale(d.performance) - 8)
             .text(d => `${d.performance}%`);
+
     }
 
     window.addEventListener("resize", () => {
@@ -532,7 +557,7 @@ function formatWorkload(w) {
 function buildBestCoreReco(workload) { 
     const benchmark = benchmarkResults.find(b => b.name.toLowerCase() === workload.replace('-', ' ')); 
     if (benchmark && benchmark.result) { 
-        return `<p>${benchmark.result.best_core}</p>`; 
+        return `<p>${benchmark.result.best_core} Core</p>`; 
     } 
     return `<p>Data tidak tersedia</p>`; 
 } 
@@ -621,146 +646,6 @@ function createResultsPopup(workload, results) {
     return popup; 
 } 
 
-// Mendapatkan daftar CPU berdasarkan workload 
-function getCPUList(workload) { 
-    if (workload === "gaming") { 
-        return [ 
-            "Ryzen 5 7600X (Zen 4) — Clock tinggi & IPC kuat, ideal untuk FPS tinggi.", 
-            "Intel Core i5-13600K (13th Gen) — Performa single-core terbaik di kelasnya.", 
-            "Ryzen 5 5600 (Zen 3) — Pilihan value untuk budget terbatas." 
-        ]; 
-    } 
-    if (workload === "video-editing") { 
-        return [ 
-            "Ryzen 7 7700X (Zen 4) — Multi-core kuat, ideal rendering.", 
-            "Intel Core i7-13700K (13th Gen) — Core banyak, kencang untuk encoding.", 
-            "Ryzen 9 7900X — Performa workstation tanpa harga ekstrem." 
-        ]; 
-    } 
-    if (workload === "web-browsing") { 
-        return [ 
-            "Ryzen 3 5300G (Zen 3) — Sangat efisien untuk tugas ringan.", 
-            "Intel Core i3-13100 (13th Gen) — Stabil & kencang untuk penggunaan kantoran.", 
-            "Ryzen 5 5600G — Value terbaik APU serba guna." 
-        ]; 
-    } 
-} 
-
-// Mendapatkan core dengan value terbaik 
-function getBestValueCore(workload, results) { 
-    if (workload === 'gaming') { 
-        return { 
-            core: '6 Cores', 
-            performance: results['6 Cores'], 
-            vsSingle: results['6 Cores'] - results['1 Core'], 
-            vsMax: results['6 Cores'] - results['8 Cores'] 
-        }; 
-    } else if (workload === 'web-browsing') { 
-        return { 
-            core: '4 Cores', 
-            performance: results['4 Cores'], 
-            vsSingle: results['4 Cores'] - results['1 Core'], 
-            vsMax: results['4 Cores'] - results['8 Cores'] 
-        }; 
-    } else { 
-        return { 
-            core: '8 Cores', 
-            performance: results['8 Cores'], 
-            vsSingle: results['8 Cores'] - results['1 Core'], 
-            vsMax: 0 
-        }; 
-    } 
-} 
-
-// Mendapatkan analisis performa 
-function getPerformanceAnalysis(workload, results) { 
-    const bestValueCore = getBestValueCore(workload, results).core; 
-    return Object.entries(results).map(([core, performance]) => ({ 
-        core, 
-        performance, 
-        isBestValue: core === bestValueCore, 
-        label: getCoreLabel(workload, core, performance) 
-    })); 
-} 
-
-// Mendapatkan label core 
-function getCoreLabel(workload, core) { 
-    const labels = { 
-        'gaming': { '1 Core': 'Minimal', '2 Cores': 'Dasar', '4 Cores': 'Baik', '6 Cores': 'Optimal', '8 Cores': 'High-End' }, 
-        'video-editing': { '1 Core': 'Sangat Lambat', '2 Cores': 'Dasar', '4 Cores': 'Standar', '6 Cores': 'Cepat', '8 Cores': 'Profesional' }, 
-        'web-browsing': { '1 Core': 'Terbatas', '2 Cores': 'Cukup', '4 Cores': 'Optimal', '6 Cores': 'Berlebih', '8 Cores': 'Berlebihan' } 
-    }; 
-    return labels[workload]?.[core] || 'Standar'; 
-} 
-
-// Mendapatkan rekomendasi praktis 
-function getPracticalRecommendation(workload) { 
-    const recommendations = { 
-        'gaming': { 
-            badge: 'Sweet Spot', 
-            analysis: 'Game modern lebih mengandalkan single-core performance. 6 core memberikan 95% performa 8 core dengan harga yang jauh lebih efisien. Budget lebih baik dialokasikan ke GPU.', 
-            specific: '6 Core - Ryzen 5 / Core i5', 
-            details: 'Prioritaskan CPU dengan clock speed tinggi dan IPC yang baik.', 
-            examples: 'Ryzen 5 7600X, Core i5-13600K, Ryzen 5 5600X' 
-        }, 
-        'video-editing': { 
-            badge: 'Recommended', 
-            analysis: 'Rendering video sangat scalable dengan core tambahan. Setiap core baru secara signifikan mempercepat proses encoding dan rendering. 8 core adalah starting point untuk editing profesional.', 
-            specific: '8+ Core - Ryzen 7 / Core i7', 
-            details: 'Investasi di core tambahan sangat worth it untuk produktivitas.', 
-            examples: 'Ryzen 7 7700X, Core i7-13700K, Ryzen 9 7900X' 
-        }, 
-        'web-browsing': { 
-            badge: 'Optimal', 
-            analysis: 'Aplikasi browsing dan office tidak memanfaatkan banyak core. 4 core modern sudah memberikan pengalaman yang smooth untuk multitasking sehari-hari. Core tambahan memberikan diminishing returns.', 
-            specific: '4 Core - Ryzen 3 / Core i3', 
-            details: 'Tidak perlu investasi berlebih untuk core tambahan.', 
-            examples: 'Ryzen 3 5300G, Core i3-13100, Ryzen 5 5600G' 
-        } 
-    }; 
-    return recommendations[workload]; 
-} 
-
-// Mendapatkan core terbaik 
-function getBestCore(results) { 
-    let bestCore = ''; 
-    let bestPerformance = 0; 
-    Object.entries(results).forEach(([core, performance]) => { 
-        if (performance > bestPerformance) { 
-            bestPerformance = performance; 
-            bestCore = core; 
-        } 
-    }); 
-    return { core: bestCore, performance: bestPerformance }; 
-} 
-
-// Menghitung faktor scaling 
-function calculateScalingFactor(results) { 
-    const singleCorePerf = results['1 Core']; 
-    const multiCorePerf = results['8 Cores']; 
-    return (multiCorePerf / singleCorePerf).toFixed(1); 
-} 
-
-// Mendapatkan insight benchmark 
-function getBenchmarkInsights(workload, results) { 
-    const insights = { 
-        'gaming': `Performance gaming meningkat ${results['8 Cores'] - results['1 Core']}% dari 1 core ke 8 core.`, 
-        'video-editing': `Scaling yang excellent! Multi-core memberikan boost ${results['8 Cores'] - results['1 Core']}%.`, 
-        'web-browsing': `Performa optimal tercapai pada 4 core.` 
-    }; 
-    return insights[workload]; 
-} 
-
-// Mendapatkan kesimpulan benchmark 
-function getBenchmarkConclusion(workload) { 
-    const conclusions = { 
-        'gaming': 'Prioritaskan CPU dengan clock speed tinggi. 6-8 core adalah sweet spot.', 
-        'video-editing': 'Investasi di CPU multi-core sangat worth it. 8+ core akan menghemat waktu render.', 
-        'web-browsing': 'CPU 4-core menawarkan value terbaik.' 
-    }; 
-    return conclusions[workload]; 
-} 
-
 // Menutup popup hasil 
 function closeResultsPopup(button) { 
     const popup = button.closest('.benchmark-results-popup'); 
@@ -797,7 +682,7 @@ function getRecommendation() {
     }); 
 
     if (answers.usage.length === 0 || !answers.budget || !answers.app_usage) { 
-        showNotification('Silakan jawab semua pertanyaan terlebih dahulu!', 'warning'); 
+        notify('warning', 'Silakan jawab semua pertanyaan terlebih dahulu!');
         return; 
     } 
 
@@ -830,7 +715,7 @@ function getRecommendation() {
     }) 
     .catch(error => { 
         console.error('Error:', error); 
-        showNotification('Terjadi kesalahan saat mengambil rekomendasi. Silakan coba lagi.', 'error'); 
+        notify('error', 'Terjadi kesalahan saat mengambil rekomendasi. Silakan coba lagi.');
     }); 
 } 
 
@@ -848,13 +733,13 @@ function displayLaptopRecommendation() {
             <div class="display-content"> 
                 <div class="visual-engine"> 
                     <button id="prev-laptop" class="nav-btn-cyber" ${currentLaptopIndex === 0 ? 'disabled' : ''}> 
-                        <i class='bx bx-chevron-left'></i> 
+                        <ion-icon name="caret-back-outline"></ion-icon> 
                     </button> 
                     <div class="laptop-frame"> 
                         ${laptop.photo ? `<img src="${laptop.photo}" alt="${laptop.name}">` : `<div class="no-img-cyber"><i class='bx bx-laptop'></i></div>`} 
                     </div> 
                     <button id="next-laptop" class="nav-btn-cyber" ${currentLaptopIndex === totalLaptops - 1 ? 'disabled' : ''}> 
-                        <i class='bx bx-chevron-right'></i> 
+                        <ion-icon name="caret-forward-outline"></ion-icon> 
                     </button> 
                 </div> 
                 <div class="specs-cyber-grid"> 
@@ -1372,38 +1257,50 @@ function initializeEventListeners() {
 // LOADING SCREEN 
 // ========================== 
 
-function hideLoadingScreen() { 
-    const loader = document.getElementById('loading-screen'); 
-    if (!loader) return; 
-    if (loadingDotsInterval) { 
-        clearInterval(loadingDotsInterval); 
-        loadingDotsInterval = null; 
-    } 
-    const txt = loader.querySelector('.loader-text'); 
-    if (txt) txt.textContent = 'Loading'; 
-    loader.classList.add('hide'); 
+function hideLoadingScreen() {
+    const loader = document.getElementById('loading-screen');
+    if (!loader) return;
 
-    setTimeout(() => { 
-        if (loader.parentNode) loader.parentNode.removeChild(loader); 
-    }, 500); 
-} 
+    if (loadingDotsInterval) {
+        clearInterval(loadingDotsInterval);
+        loadingDotsInterval = null;
+    }
 
-function startLoadingDots() { 
-    const el = document.querySelector('.loader-text'); 
-    if (!el) return; 
-    loadingDotCount = 0; 
-    if (loadingDotsInterval) clearInterval(loadingDotsInterval); 
-    loadingDotsInterval = setInterval(() => { 
-        loadingDotCount = (loadingDotCount % 3) + 1; 
-        el.textContent = 'Loading' + '.'.repeat(loadingDotCount); 
-    }, 500); 
-} 
+    const txt = loader.querySelector('.loader-text');
+    if (txt) txt.textContent = 'Loading';
+
+    loader.classList.add('hide');
+
+    loader.addEventListener('animationend', () => {
+        loader.remove();
+    }, { once: true });
+}
+
+
+function startLoadingDots() {
+    if (loadingDotsInterval) return; // ⛔ cegah reset
+
+    const el = document.querySelector('.loader-text');
+    if (!el) return;
+
+    loadingDotCount = 0;
+
+    loadingDotsInterval = setInterval(() => {
+        loadingDotCount = (loadingDotCount % 3) + 1;
+        el.textContent = 'Loading' + '.'.repeat(loadingDotCount);
+    }, 500);
+}
+
+
 
 // ========================== 
 // INITIALIZATION 
 // ========================== 
 
+
 document.addEventListener('DOMContentLoaded', function () { 
+    
+    startLoadingDots(); 
     updateChart = initializeBenchmarkChart(); 
     initializeGlossary(); 
     initializeEventListeners(); 
@@ -1412,7 +1309,10 @@ document.addEventListener('DOMContentLoaded', function () {
     generateFloatingParticles(); 
     updateCustomerCounts(); 
     updateTimeDisplays(); 
-    hideLoadingScreen(); 
+
+    setTimeout(() => {
+        hideLoadingScreen();
+    }, 1500); // 
 
     const el = document.getElementById('typed'); 
     if (el) { 
@@ -1461,7 +1361,6 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Kelompok 5\nPerbedaan Single-Core vs Multi-core\nAqshal Virgiawan\nDika Pida Ismail\nFauzan Fathurrohman\nHarlan Ikhsan\nJasmine Haimana Wildan\nRafly Al Bukhary\nRidho Muhamad Ilham'); 
 }); 
 
-startLoadingDots(); 
 
 // ========================== 
 // TEAM SWIPER 
@@ -1565,19 +1464,31 @@ function initializeParallax() {
 // STICKY HEADER 
 // ========================== 
 
-function initializeStickyHeader() { 
-    const header = document.querySelector('header'); 
-    if (!header) return; 
+function initializeStickyHeader() {
+    const header = document.querySelector('header.glass-header');
+    const heroSection = document.querySelector('.hero');
 
-    function updateStickyHeader() { 
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
-        if (scrollTop > 100) { 
-            header.classList.add('sticky'); 
-        } else { 
-            header.classList.remove('sticky'); 
-        } 
-    } 
+    if (!header || !heroSection) return;
 
-    window.addEventListener('scroll', updateStickyHeader); 
-    updateStickyHeader(); 
+    const heroObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                // hero hilang → sticky masuk
+                header.classList.remove('sticky-exit');
+                header.classList.add('sticky');
+            } else {
+                // hero muncul → sticky keluar (animasi dulu)
+                if (header.classList.contains('sticky')) {
+                    header.classList.add('sticky-exit');
+
+                    header.addEventListener('transitionend', () => {
+                        header.classList.remove('sticky');
+                        header.classList.remove('sticky-exit');
+                    }, { once: true });
+                }
+            }
+        });
+    }, { threshold: 0 });
+
+    heroObserver.observe(heroSection);
 }
