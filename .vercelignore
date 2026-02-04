@@ -1,0 +1,8 @@
+/bootstrap/cache/*
+/storage/framework/
+/storage/logs/*
+node_modules
+.env
+.git
+.github
+*.md
