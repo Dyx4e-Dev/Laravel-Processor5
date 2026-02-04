@@ -237,6 +237,70 @@ body::after { background: var(--secondary); bottom: -50px; right: -50px; }
     font-size: 24px;
     font-weight: 700;
 }
+/* Container Pagination */
+.pagination-wrapper {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    gap: 8px;
+    padding: 0;
+}
+
+/* Kotak Angka & Tombol */
+.pagination li a, 
+.pagination li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 15px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+/* Hover Effect */
+.pagination li a:hover {
+    background: rgba(0, 243, 255, 0.1);
+    border-color: var(--secondary);
+    color: var(--secondary);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Active Page (Halaman Saat Ini) */
+.pagination li.active span {
+    background: var(--primary); /* Gunakan warna neon Anda */
+    border-color: var(--primary);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+}
+
+/* Disabled State (Prev/Next yang tidak aktif) */
+.pagination li.disabled span {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Responsif Mobile */
+@media (max-width: 480px) {
+    .pagination li:not(.active):not(:first-child):not(:last-child) {
+        display: none; /* Sembunyikan angka di HP, sisakan Prev, Next, dan Active */
+    }
+}
 
 /* Table */
 .custom-table {

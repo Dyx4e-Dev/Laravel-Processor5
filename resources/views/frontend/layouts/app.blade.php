@@ -51,7 +51,7 @@
     @include('frontend.footer')
 
     <!-- toTop -->
-    <button class="scroll-to-top reveal" id="scrollToTop">
+    <button class="scroll-to-top" id="scrollToTop">
         <ion-icon name="arrow-up-outline"></ion-icon>
     </button>
     <!-- toTop -->

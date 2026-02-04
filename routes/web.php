@@ -33,16 +33,16 @@ Route::post('/submit-quiz', [FrontendController::class, 'submitQuiz']);
 // Endpoint untuk rekomendasi laptop berdasarkan skor
 Route::post('/recommend', [FrontendController::class, 'recommend']);
 
+Route::get('admin/login', [AuthController::class, 'showLogin'])->name('admin.login');
+Route::post('admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
 /*
 |--------------------------------------------------------------------------
 | BACKEND - ADMIN
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware(['auth'])->group(function () {
 
-    // Login Routes
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('admin.login');
-    Route::post('/login', [AuthController::class, 'login'])->name('admin.login.submit');
+    // Logout Route (butuh auth)
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
     // Dashboard 

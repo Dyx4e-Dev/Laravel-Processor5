@@ -26,7 +26,9 @@
             <tbody>
                 @foreach($quizzes as $quiz)
                 <tr>
-                    <td style="color: var(--primary); font-weight: bold;">#{{ $loop->iteration }}</td>
+                    <td style="color: var(--primary); font-weight: bold;">
+                        #{{ ($quizzes->currentPage() - 1) * $quizzes->perPage() + $loop->iteration }}
+                    </td>
                     <td style="line-height: 1.4;">
                         <p>{{ Str::limit($quiz->question, 60) }}</p>
                     </td>
@@ -57,6 +59,9 @@
             </tbody>
         </table>
     </div>
+</div>
+<div class="pagination-wrapper">
+        {{ $quizzes->links('pagination::bootstrap-4') }}
 </div>
 
 <div id="addModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; place-items:center; overflow-y: auto; padding: 20px;">

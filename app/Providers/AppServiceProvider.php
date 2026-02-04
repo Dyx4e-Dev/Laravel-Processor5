@@ -19,6 +19,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use App\Listeners\LogAdminLogin;
 use App\Listeners\LogAdminLogout;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        if(env('APP_URL') && str_contains(env('APP_URL'), 'https')){
+            URL::forceScheme('https');
+        }
+
         // Register observers untuk activity logging
         Benchmark::observe(BenchmarkObserver::class);
         Quiz::observe(QuizObserver::class);
@@ -47,4 +53,6 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Event::listen(Login::class, LogAdminLogin::class);
         \Illuminate\Support\Facades\Event::listen(Logout::class, LogAdminLogout::class);
     }
+
+    
 }

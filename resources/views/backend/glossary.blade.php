@@ -29,7 +29,7 @@
                     <td style="max-width: 400px; color: #ccc;">{{ Str::limit($g->explanation, 100) }}</td>
                     <td style="text-align: right;">
                         <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                            <button onclick='handleOpenEditModal({!! $g->toJson() !!})' style="background:none; border:none; color:var(--secondary); cursor:pointer;">
+                            <button data-glossary="{{ $g->toJson() }}" onclick='handleOpenEditModal(this.dataset.glossary)' style="background:none; border:none; color:var(--secondary); cursor:pointer;">
                                 <i class='bx bx-edit-alt' style="font-size: 20px;"></i>
                             </button>
                             

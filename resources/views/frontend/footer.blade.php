@@ -8,8 +8,9 @@
                     <li><a href="#analogy">Analogi</a></li>
                     <li><a href="#benchmark">Benchmark</a></li>
                     <li><a href="#recommendation">Rekomendasi</a></li>
+                    <li><a href="#team">Team</a></li> 
+                    <li><a href="#quiz">Quiz</a></li> 
                     <li><a href="#glossary">Glosarium</a></li>
-                    <li><a href="#team">Team</a></li>
                 </ul>
                 <p>&copy; 2025 Pentacore. All rights reserved.</p>
             </div>

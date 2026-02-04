@@ -299,11 +299,6 @@ body::after {
     color: var(--primary);
 }
 
-.hamburger:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
 /* ================= HERO ================= */
 
 .hero {
@@ -925,6 +920,9 @@ section {
 }
 
 .benchmark-results {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
     display: flex;
     justify-content: center;
     margin-bottom: 40px;
@@ -2122,4 +2120,950 @@ footer {
     to {
         transform: translateY(-100%);
     }
+}
+
+/* ================= NAV MOBILE FULLSCREEN ================= */
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+    .nav-container {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100vw;
+        height: 100vh;
+        background: var(--dark);
+        backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        transition: transform 0.45s cubic-bezier(.4,0,.2,1);
+        z-index: 999;
+    }
+    .nav-container.active {
+        transform: translateX(-100%);
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;     
+        align-items: center;    
+        gap: 16px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    /* Tablet-specific tweaks: center main container and benchmark */
+    .container {
+        padding-left: 24px;
+        padding-right: 24px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .benchmark-container {
+        gap: 24px;
+        padding: 10px 0;
+        align-items: center;
+    }
+
+    /* Reduce chart padding/height for tablet */
+    #benchmark-chart {
+        padding: 20px;
+        min-height: 360px;
+        max-width: 720px;
+        margin: 20px auto;
+        box-sizing: border-box;
+    }
+
+    /* Mengatur tombol kategori agar tidak terlalu lebar */
+    .benchmark-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }                                                                                                                                                       
+
+    /* Slightly smaller axis labels on tablet */
+    #benchmark-chart .x-axis text {
+        font-size: 11px;
+    }
+
+    #benchmark-chart .y-axis text {
+        font-size: 10px;
+    }
+
+}
+
+/* ================= TABLET RESPONSIVE (min-width: 769px and max-width: 1024px) ================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Optimize font sizes for tablet readability */
+    body {
+        font-size: 16px; /* Slightly larger base font */
+    }
+
+    /* Headings */
+    h1 {
+        font-size: 2.8rem;
+    }
+
+    h2 {
+        font-size: 2.2rem;
+    }
+
+    h3 {
+        font-size: 1.8rem;
+    }
+
+    /* Section titles */
+    .section-title {
+        font-size: 2.1rem;
+    }
+
+    /* Hero section */
+    .hero h1 {
+        font-size: 3.2rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+    }
+
+    /* Benchmark chart */
+    #benchmark-chart {
+        min-height: 450px;
+        max-width: 95vw;
+        padding: 30px;
+        margin: 30px auto;
+    }
+
+    #benchmark-chart .x-axis text {
+        font-size: 13px;
+    }
+
+    #benchmark-chart .y-axis text {
+        font-size: 12px;
+    }
+
+    #benchmark-chart .label {
+        font-size: 14px;
+    }
+
+    /* Buttons */
+    .btn {
+        font-size: 1rem;
+        padding: 12px 24px;
+    }
+
+    /* Quiz and other sections */
+    .quiz-title {
+        font-size: 1.6rem;
+    }
+
+    /* Container adjustments */
+    .container {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+
+    .benchmark-results-reveal {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 0;
+    }
+
+    /* Benchmark container */
+    .benchmark-container {
+        gap: 32px;
+    }
+
+
+    /* Popup content */
+    .benchmark-results-content h3 {
+        font-size: 1.8rem;
+    }
+
+    .benchmark-results-content h4 {
+        font-size: 1.4rem;
+    }
+
+    .core-item {
+        font-size: 1rem;
+    }
+}
+
+/* ================= MOBILE PHONE RESPONSIVE (max-width: 480px) ================= */
+@media (max-width: 480px) {
+    * {
+        box-sizing: border-box;
+    }
+
+    html {
+        font-size: 13px;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Ensure main container stays centered on small screens */
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+
+    body::before,
+    body::after {
+        width: 200px;
+        height: 200px;
+        filter: blur(80px);
+        opacity: 0.1;
+    }
+
+    /* HEADER */
+    .glass-header {
+        padding: 12px 15px;
+        width: 100%;
+    }
+
+    .logo img {
+        height: 45px;
+    }
+
+    .hamburger {
+        font-size: 1.5rem;
+        padding: 8px;
+    }
+
+    /* HERO SECTION */
+   .hero {
+    padding-top: 100px !important; /* Beri ruang untuk header transparan */
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 1.6rem; /* Sedikit lebih kecil agar teks tidak pecah baris terlalu ekstrem */
+    line-height: 1.3;
+}
+
+    .hero p {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        word-wrap: break-word;
+    }
+
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .hero-card.glass-card {
+        padding: 20px;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    .btn.primary-btn,
+    .btn.secondary-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        width: 100%;
+        border-radius: 24px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* CARD & SECTION */
+    .card.glass {
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    .card h2 {
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+        word-wrap: break-word;
+    }
+
+    .card p {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        word-wrap: break-word;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-size: inherit;
+        word-wrap: break-word;
+    }
+
+    section h1 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+    }
+
+    section h2 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+    }
+
+    /* WELCOME CARD */
+    .welcome-card {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px !important;
+        width: 100%;
+    }
+
+    .welcome-info h1 {
+        font-size: 1.4rem;
+    }
+
+    .welcome-info p {
+        font-size: 0.85rem;
+    }
+
+    .btn-neon {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    /* TABLE */
+    .table-section {
+    margin: 0 -15px; /* Menghilangkan padding container agar tabel bisa full edge-to-edge */
+    width: calc(100% + 30px);
+    border-radius: 0; 
+}
+
+.custom-table {
+    min-width: 500px; /* Biarkan tabel punya lebar minimum agar tidak terjepit */
+}
+
+    .custom-table th,
+    .custom-table td {
+        padding: 8px 6px;
+    }
+
+    .custom-table img {
+        width: 40px;
+        height: 30px;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 2px 4px;
+        display: inline-block;
+        margin: 2px;
+    }
+
+    /* BENCHMARK SECTION */
+    .benchmark-container {
+        padding: 15px;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .benchmark-controls {
+        gap: 8px;
+        margin-bottom: 20px;
+        justify-content: center;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .workload-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .supermarket-visualization {
+        display: block;
+    }
+
+    #benchmark-chart {
+        width: 100% !important; /* Paksa lebar 100% */
+        height: auto !important;
+        min-height: 400px; /* Beri ruang vertikal yang cukup */
+        padding: 10px;
+        margin: 10px auto;
+        overflow: visible; /* Penting agar label axis tidak terpotong */
+    }
+
+    /* Memperkecil teks axis agar tidak bertabrakan di tablet */
+    #benchmark-chart .x-axis text {
+        font-size: 10px;
+        transform: translateY(5px);
+    }
+    #benchmark-chart .y-axis text {
+        font-size: 10px;
+    }
+
+    #benchmark-chart .label {
+        font-size: 9px;
+    }
+
+    /* BENCHMARK RESULTS POPUP */
+    .benchmark-results-popup {
+        padding: 10px;
+    }
+
+    .benchmark-results-content {
+        max-width: 95vw;
+        padding: 15px;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    .benchmark-results-header h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        word-wrap: break-word;
+    }
+
+    .workload-type {
+        font-size: 0.9rem;
+    }
+
+    .performance-score {
+        font-size: 2rem;
+    }
+
+    .best-core {
+        font-size: 1.3rem;
+    }
+
+    .reco-core-list,
+    .cpu-reco-list,
+    .analysis-section,
+    .benchmark-insights,
+    .benchmark-conclusion {
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .reco-core-list h4,
+    .cpu-reco-list h4,
+    .analysis-section h4 {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+    .cpu-item {
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+    }
+
+    .cpu-name {
+        font-size: 0.85rem;
+    }
+
+    .close-results-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* SIMULATION SECTION */
+    .simulation-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px;
+        width: 100%;
+    }
+
+    .queue-container,
+    .stats {
+        padding: 12px;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    .queue-container h3,
+    .stats h3 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .queue {
+        gap: 8px;
+        padding: 8px;
+        min-height: 70px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .customer {
+        width: 40px;
+        height: 40px;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .stat-item {
+        padding: 6px;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    /* ANALOGY EXPLANATION */
+    .analogy-explanation {
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    /* RECOMMENDATION SECTION */
+    .core-display-card {
+        padding: 15px;
+        border-radius: 12px;
+        width: 100%;
+    }
+
+    .rank-badge {
+        left: 12px;
+        top: -12px;
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+
+    .laptop-title-gradient {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+    }
+
+    .visual-engine {
+        margin-bottom: 15px;
+        gap: 8px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .nav-btn-cyber {
+        padding: 6px 10px;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .laptop-frame {
+        max-width: 180px;
+        min-width: 150px;
+        flex-shrink: 0;
+    }
+
+    .laptop-frame img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .no-img-cyber {
+        width: 150px;
+        height: 100px;
+    }
+
+    .specs-cyber-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .grid-cell {
+        padding: 8px;
+        border-radius: 8px;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .grid-cell label {
+        font-size: 0.8rem;
+    }
+
+    .grid-cell p {
+        font-size: 0.85rem;
+        word-wrap: break-word;
+    }
+
+    .price-neon-container {
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .price-tag {
+        padding: 12px;
+    }
+
+    .price-tag small {
+        font-size: 0.75rem;
+    }
+
+    .price-tag h3 {
+        font-size: 1.3rem;
+        word-wrap: break-word;
+    }
+
+    /* QUIZ SECTION */
+    .quiz-form {
+        padding: 12px;
+        width: 100%;
+    }
+
+    .quiz-form h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+    }
+
+    .quiz-form label {
+        font-size: 0.85rem;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .quiz-form input,
+    .quiz-form select {
+        padding: 8px;
+        font-size: 0.9rem;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .quiz-form button {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* QUIZ POPUP */
+    .quiz-popup {
+        padding: 10px;
+        align-items: flex-end;
+        width: 100%;
+    }
+
+    .quiz-popup.show {
+        align-items: center;
+    }
+
+    .quiz-header {
+        padding: 12px;
+        width: 100%;
+    }
+
+    .quiz-header h2 {
+        font-size: 1.1rem;
+        word-wrap: break-word;
+    }
+
+    .question-counter {
+        font-size: 0.8rem;
+    }
+
+    .timer-display {
+        font-size: 0.85rem;
+    }
+
+    .progress-container {
+        height: 2px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .question-text {
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+    }
+
+    .answer-btn {
+        padding: 10px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    #quiz-form-container {
+        padding: 15px;
+        width: 100%;
+    }
+
+    /* QUIZ RESULT CARD */
+    .quiz-result-card {
+        padding: 20px 15px !important;
+        text-align: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .quiz-title {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        word-wrap: break-word;
+    }
+
+    .score-circle {
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 1.6rem !important;
+        margin: 12px auto !important;
+        border-radius: 50% !important;
+    }
+
+    .score-circle ~ div {
+        font-size: 0.8rem;
+        display: inline-block;
+        padding: 4px 10px !important;
+        border-radius: 16px;
+        word-wrap: break-word;
+        max-width: 90%;
+    }
+
+    /* GLOSSARY SECTION */
+    .glossary-container {
+        padding: 10px;
+        width: 100%;
+    }
+
+    .glossary-term {
+        margin-bottom: 10px;
+        border-radius: 10px;
+        width: 100%;
+    }
+
+    .term-toggle {
+        padding: 10px;
+        font-size: 0.9rem;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .term-definition {
+        padding: 10px;
+        font-size: 0.85rem;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .chevron-icon {
+        font-size: 1rem;
+    }
+
+    /* TEAM SECTION */
+    .team-swiper {
+        padding: 10px 0;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .swiper-slide {
+        padding: 5px;
+    }
+
+    /* Tambahkan ini di dalam media query 480px Anda */
+
+.analogy-container {
+    flex-direction: column !important;
+    align-items: center;
+    gap: 30px;
+}
+
+.supermarket-visualization {
+    width: 100%;
+    overflow-x: auto; /* Jika masih lebar, bisa di-scroll */
+    padding: 10px 0;
+}
+
+.core-type {
+    width: 100% !important;
+    margin-bottom: 20px;
+}
+
+.checkout-area {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap; /* Supaya ikon kasir turun jika tidak muat */
+    gap: 10px;
+}
+
+.analogy-controls {
+    display: grid; /* Gunakan grid agar rapi */
+    grid-template-columns: 1fr 1fr; /* 2 tombol di atas */
+    gap: 10px;
+    width: 100%;
+}
+
+.analogy-controls button:last-child {
+    grid-column: span 2; /* Tombol Reset buat lebar penuh di bawahnya */
+}
+
+.btn-action {
+    padding: 12px !important; /* Perbesar area sentuh */
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+}
+
+    .member-card {
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .member-name {
+        font-size: 0.95rem;
+        margin: 8px 0 4px;
+        word-wrap: break-word;
+    }
+
+    .member-role {
+        font-size: 0.8rem;
+        word-wrap: break-word;
+    }
+
+    /* MODAL/POPUP */
+    #addModal,
+    #editModal {
+        padding: 10px;
+        align-items: flex-end;
+        width: 100%;
+    }
+
+    #addModal.show,
+    #editModal.show {
+        align-items: center;
+    }
+
+    #addModal .card,
+    #editModal .card {
+        width: 90vw;
+        max-width: 450px;
+        padding: 15px;
+        border-radius: 12px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    #addModal h3,
+    #editModal h3 {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        word-wrap: break-word;
+    }
+
+    .glass-input {
+        padding: 8px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        margin-bottom: 6px;
+        width: 100%;
+    }
+
+    .input-group {
+        margin-bottom: 8px;
+        width: 100%;
+    }
+
+    .input-group label {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+
+    /* FOOTER */
+    footer {
+        padding: 15px;
+        text-align: center;
+        width: 100%;
+    }
+
+    footer p {
+        font-size: 0.8rem;
+        word-wrap: break-word;
+    }
+
+    /* UTILITIES */
+    #scrollToTop {
+        bottom: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .notification-area {
+        bottom: 15px;
+        right: 15px;
+        left: 15px;
+        max-width: calc(100vw - 30px);
+        width: calc(100% - 30px);
+    }
+
+    .notif {
+        margin-bottom: 8px;
+        padding: 10px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .notif-icon {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .notif-text {
+        font-size: 0.8rem;
+        word-wrap: break-word;
+    }
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.6s ease-out;
+}
+
+.reveal.show {
+    opacity: 1;
+    transform: translateY(0);
 }

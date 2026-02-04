@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Laptop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RecommendationController extends Controller
 {
@@ -31,7 +32,10 @@ class RecommendationController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $filename = time() . '_' . $request->file('photo')->getClientOriginalName();
+            // Sanitize nama file untuk mencegah path traversal
+            $originalName = pathinfo($request->file('photo')->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $request->file('photo')->getClientOriginalExtension();
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
             $request->file('photo')->move(public_path('img/laptop'), $filename);
             $data['photo'] = 'img/laptop/' . $filename;
         }
@@ -45,14 +49,29 @@ class RecommendationController extends Controller
     public function update(Request $request, $id)
     {
         $laptop = Laptop::findOrFail($id);
-        $data = $request->all();
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'brand' => 'required',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'processor' => 'required',
+            'ram' => 'required',
+            'storage' => 'required',
+            'vga' => 'required',
+            'screen_size' => 'required',
+            'price' => 'required|numeric',
+            'recommendation' => 'required|array',
+            'app_usage' => 'required|in:single-threaded,multi-threaded',
+        ]);
 
         if ($request->hasFile('photo')) {
             // Hapus foto lama jika ada
             if ($laptop->photo && file_exists(public_path($laptop->photo))) {
                 unlink(public_path($laptop->photo));
             }
-            $filename = time() . '_' . $request->file('photo')->getClientOriginalName();
+            // Sanitize nama file untuk mencegah path traversal
+            $originalName = pathinfo($request->file('photo')->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $request->file('photo')->getClientOriginalExtension();
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
             $request->file('photo')->move(public_path('img/laptop'), $filename);
             $data['photo'] = 'img/laptop/' . $filename;
         }

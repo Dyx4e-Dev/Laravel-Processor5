@@ -9,7 +9,7 @@ use App\Models\Quiz;
 class QuizController extends Controller
 {
     public function index() {
-        $quizzes = Quiz::orderBy('id')->get();
+        $quizzes = Quiz::latest()->paginate(10);
         return view('backend.quiz', compact('quizzes'));
     }
 

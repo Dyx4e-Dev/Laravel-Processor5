@@ -12,16 +12,16 @@
             <div id="quiz-form-container">
             @if($quiz_results) 
                 <div class="quiz-result-card" style="text-align: center;">
-                 <h2 class="quiz-title">Anda sudah melakukan quiz, Terimakasih</h2>
-                    <p style="margin-bottom: 10px;">{{ $quiz_results->nama }}</p>
+                <h4 style="margin-bottom: 10px; color:var(--light);">{{ $quiz_results->nama }}</h4>
+                <h2 class="quiz-title">Anda sudah melakukan quiz, Terimakasih</h2>
                     
-                    <div class="score-circle" style="width: 100px; height: 100px; background: #6e8efb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px auto; color: white; font-size: 2.5rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                        {{ $quiz_results->score }}
-                    </div>
-                    
-                    <div style="display: inline-block; padding: 5px 15px; background: #e0f2f1; color: #00796b; border-radius: 20px; font-weight: bold;">
-                        {{ $quiz_results->reward_status }}
-                    </div>
+                <div class="score-circle" style="width: 100px; height: 100px; background: #6e8efb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px auto; color: white; font-size: 2.5rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    {{ $quiz_results->score }}
+                </div>
+                
+                <div style="display: inline-block; padding: 5px 15px; background: #e0f2f1; color: #00796b; border-radius: 20px; font-weight: bold;">
+                    {{ $quiz_results->reward_status }}
+                </div>
                 </div>
             @else
                 <form action="/submit-quiz" method="POST" class="quiz-form">

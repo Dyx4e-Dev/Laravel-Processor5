@@ -214,11 +214,31 @@
         document.getElementById('edit_price').value = data.price;
         document.getElementById('edit_app_usage').value = data.app_usage;
 
-        // Handle recommendation checkboxes
-        document.getElementById('edit_gaming').checked = data.recommendation.includes('gaming');
-        document.getElementById('edit_productivity').checked = data.recommendation.includes('productivity');
-        document.getElementById('edit_programming').checked = data.recommendation.includes('programming');
-        document.getElementById('edit_content_creation').checked = data.recommendation.includes('content-creation');
+        // Handle recommendation checkboxes (safely normalize to array)
+        let recs = [];
+        try {
+            if (Array.isArray(data.recommendation)) {
+                recs = data.recommendation;
+            } else if (typeof data.recommendation === 'string') {
+                // could be a JSON string like '["gaming","programming"]' or a comma-separated string
+                try {
+                    recs = JSON.parse(data.recommendation);
+                    if (!Array.isArray(recs)) recs = [String(recs)];
+                } catch (e) {
+                    recs = data.recommendation.split(',').map(s => s.trim()).filter(Boolean);
+                }
+            } else if (data.recommendation && typeof data.recommendation === 'object') {
+                // convert object values to array
+                recs = Object.values(data.recommendation).map(String);
+            }
+        } catch (e) {
+            recs = [];
+        }
+
+        document.getElementById('edit_gaming').checked = recs.includes('gaming');
+        document.getElementById('edit_productivity').checked = recs.includes('productivity');
+        document.getElementById('edit_programming').checked = recs.includes('programming');
+        document.getElementById('edit_content_creation').checked = recs.includes('content-creation');
 
         // Show current photo if exists
         const currentPhotoDiv = document.getElementById('currentPhoto');

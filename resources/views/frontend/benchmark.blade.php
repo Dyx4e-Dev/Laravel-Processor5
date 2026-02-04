@@ -44,12 +44,6 @@ benchmarkData['{{ strtolower(str_replace(' ', '-', $b->name)) }}'] = @json($b->s
             <div id="bestCoreList"></div>
         </div>
 
-        <!-- 2. PERFORMA CORE 1–8 -->
-        <div class="core-performance-list">
-            <h4>Perbandingan Performa Core 1–8</h4>
-            <div id="corePerformanceList"></div>
-        </div>
-
         <!-- 3. CPU REKOMENDASI -->
         <div class="cpu-reco-list">
             <h4>Rekomendasi CPU Spesifik</h4>

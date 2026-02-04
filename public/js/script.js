@@ -275,232 +275,133 @@ let updateChart;
 
 // Inisialisasi chart benchmark dengan D3.js 
 function initializeBenchmarkChart() {
-    const margin = { top: 30, right: 30, bottom: 55, left: 55 };
-    const container = d3.select("#benchmark-chart");
-    container.html("");
-
-    function getSize() {
-        const w = container.node().getBoundingClientRect().width;
-        const svgWidth = Math.max(320, Math.min(w, 900));
-        const svgHeight = Math.max(280, svgWidth * 0.55);
-        return {
-            svgWidth,
-            svgHeight,
-            width: svgWidth - margin.left - margin.right,
-            height: svgHeight - margin.top - margin.bottom
-        };
-    }
-
-    let { svgWidth, svgHeight, width, height } = getSize();
-
-    const svg = container.append("svg")
-        .attr("width", svgWidth)
-        .attr("height", svgHeight)
-        .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`)
+    const svgWidth = 600;
+    const svgHeight = 450;
+    const margin = { top: 20, right: 30, bottom: 40, left: 70 };
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+    d3.select("#benchmark-chart").html("");
+    const svg = d3.select("#benchmark-chart")
+        .append("svg")
+        .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+        .attr("width", "100%")
+        .attr("height", "100%")
         .attr("preserveAspectRatio", "xMidYMid meet");
-
-    /* ===== Defs (Gradient + Glow) ===== */
-    const defs = svg.append("defs");
-
-    const gradient = defs.append("linearGradient")
-        .attr("id", "barGradient")
-        .attr("x1", "0%").attr("y1", "0%")
-        .attr("x2", "0%").attr("y2", "100%");
-
-    gradient.append("stop")
-        .attr("offset", "0%")
-        .attr("stop-color", "var(--primary)")
-        .attr("stop-opacity", 0.9);
-
-    gradient.append("stop")
-        .attr("offset", "100%")
-        .attr("stop-color", "var(--primary)")
-        .attr("stop-opacity", 0.4);
-
-    const glow = defs.append("filter")
-        .attr("id", "glow");
-
-    glow.append("feGaussianBlur")
-        .attr("stdDeviation", "3")
-        .attr("result", "coloredBlur");
-
-    const feMerge = glow.append("feMerge");
-    feMerge.append("feMergeNode").attr("in", "coloredBlur");
-    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
     const g = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    const xScale = d3.scaleBand().padding(0.2).range([0, width]);
-    const yScale = d3.scaleLinear().range([height, 0]);
-
+    const xScale = d3.scaleBand()
+        .range([0, width])
+        .padding(0.1);
+    const yScale = d3.scaleLinear()
+        .range([height, 0]);
     const xAxis = d3.axisBottom(xScale);
-    const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d => `${d}%`);
-
+    const yAxis = d3.axisLeft(yScale);
     g.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`);
-
     g.append("g")
         .attr("class", "y-axis");
-
-    /* ===== Grid ===== */
-    g.append("g")
-        .attr("class", "grid");
-
-    /* ===== Axis Labels ===== */
     g.append("text")
-        .attr("class", "y-axis-label")
         .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left + 18)
-        .attr("text-anchor", "middle")
-        .style("fill", "#cfd8dc")
-        .style("font-size", "14px")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("fill", "#fff")
+        .style("font-size", "12px")
         .text("Performance (%)");
-
-    g.append("text")
-        .attr("class", "x-axis-label")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 8)
-        .attr("text-anchor", "middle")
-        .style("fill", "#cfd8dc")
-        .style("font-size", "14px")
-        .text("Processor");
-
-    /* ===== Tooltip ===== */
     const tooltip = d3.select("body")
         .append("div")
         .attr("class", "chart-tooltip")
-        .style("position", "absolute")
-        .style("background", "rgba(20,20,20,0.9)")
-        .style("backdrop-filter", "blur(6px)")
-        .style("color", "#fff")
-        .style("padding", "10px 14px")
-        .style("border-radius", "10px")
-        .style("font-size", "13px")
+        .style("position", "fixed")
+        .style("background", "rgba(0, 0, 0, 0.8)")
+        .style("color", "white")
+        .style("padding", "8px")
+        .style("border-radius", "4px")
+        .style("font-size", "12px")
         .style("pointer-events", "none")
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .style("z-index", "1000");
 
-    function updateChart(workload) {
-        const size = getSize();
-        svgWidth = size.svgWidth;
-        svgHeight = size.svgHeight;
-        width = size.width;
-        height = size.height;
-
-        svg.attr("width", svgWidth).attr("height", svgHeight);
-        xScale.range([0, width]);
-        yScale.range([height, 0]);
-
-        g.select(".x-axis").attr("transform", `translate(0,${height})`);
-        g.select(".x-axis-label").attr("x", width / 2).attr("y", height + margin.bottom - 8);
-        g.select(".y-axis-label").attr("x", -height / 2);
-
-        const data = Object.entries(benchmarkData[workload])
-            .map(([core, performance]) => ({ core, performance }));
-
+    // Fungsi untuk memperbarui chart
+    function updateChartFunction(workload) {
+        const data = Object.entries(benchmarkData[workload]).map(([core, performance]) => ({
+            core,
+            performance
+        }));
         xScale.domain(data.map(d => d.core));
         yScale.domain([0, 100]);
-
-        /* Grid */
-        g.select(".grid")
-            .transition().duration(600)
-            .call(
-                d3.axisLeft(yScale)
-                    .ticks(5)
-                    .tickSize(-width)
-                    .tickFormat("")
-            )
-            .selectAll("line")
-            .attr("stroke", "rgba(255,255,255,0.08)");
-
         g.select(".x-axis")
-            .transition().duration(600)
-            .ease(d3.easeCubicOut)
+            .transition()
+            .duration(1000)
+            .ease(d3.easeBackOut)
             .call(xAxis);
-
         g.select(".y-axis")
-            .transition().duration(600)
-            .ease(d3.easeCubicOut)
+            .transition()
+            .duration(1000)
+            .ease(d3.easeBackOut)
             .call(yAxis);
-
-        const bars = g.selectAll(".bar").data(data, d => d.core);
-
+        const bars = g.selectAll(".bar")
+            .data(data, d => d.core);
         bars.exit()
-            .transition().duration(400)
+            .transition()
+            .duration(1000)
+            .ease(d3.easeBackOut)
             .attr("y", height)
             .attr("height", 0)
             .remove();
-
-        const enterBars = bars.enter()
+        const barsEnter = bars.enter()
             .append("rect")
             .attr("class", "bar")
             .attr("x", d => xScale(d.core))
-            .attr("y", height)
+            .attr("y", d => yScale(d.performance))
             .attr("width", xScale.bandwidth())
-            .attr("height", 0)
-            .attr("rx", 6)
-            .attr("fill", "url(#barGradient)")
-            .attr("filter", "url(#glow)")
-            .on("mousemove", (e, d) => {
-                tooltip.style("opacity", 1)
-                    .html(`<strong>${d.core}</strong><br>${d.performance}%`)
-                    .style("left", e.pageX + 12 + "px")
-                    .style("top", e.pageY - 28 + "px");
+            .attr("height", d => height - yScale(d.performance))
+            .attr("fill", "#00ff9d")
+            .on("mouseover", function (event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`${d.core}<br/>Performance: ${d.performance}%`)
+                    .style("left", (event.clientX + 10) + "px")
+                    .style("top", (event.clientY - 28) + "px");
+                d3.select(this).style("opacity", 0.7);
             })
-            .on("mouseleave", () => tooltip.style("opacity", 0));
-
-        enterBars.merge(bars)
+            .on("mouseout", function () {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+                d3.select(this).style("opacity", 1);
+            });
+        barsEnter.merge(bars)
             .transition()
-            .duration(800)
-            .ease(d3.easeCubicInOut)
-            .delay((_, i) => i * 80)
+            .duration(1000)
+            .ease(d3.easeBackOut)
             .attr("x", d => xScale(d.core))
             .attr("y", d => yScale(d.performance))
             .attr("width", xScale.bandwidth())
             .attr("height", d => height - yScale(d.performance));
-
-        const labels = g.selectAll(".label").data(data, d => d.core);
-
-        labels.exit()
-            .transition()
-            .duration(400)
-            .attr("y", height)
-            .style("opacity", 0)
-            .remove();
-
-        const enterLabels = labels.enter()
+        const labels = g.selectAll(".label")
+            .data(data, d => d.core);
+        labels.exit().remove();
+        labels.enter()
             .append("text")
             .attr("class", "label")
             .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "auto")
-            .style("fill", "#fff")
-            .style("font-size", "12px")
-            .style("font-weight", "600")
-            .style("opacity", 0)
+            .attr("fill", "#fff")
             .attr("x", d => xScale(d.core) + xScale.bandwidth() / 2)
-            .attr("y", height);
-
-        enterLabels.merge(labels)
+            .attr("y", d => yScale(d.performance) - 5)
+            .text(d => `${d.performance}%`)
+            .merge(labels)
+            .text(d => `${d.performance}%`)
             .transition()
-            .duration(800)
-            .ease(d3.easeCubicInOut)
-            .delay((_, i) => i * 80)
-            .style("opacity", 1)
+            .duration(1000)
+            .ease(d3.easeBackOut)
             .attr("x", d => xScale(d.core) + xScale.bandwidth() / 2)
-            .attr("y", d => yScale(d.performance) - 8)
-            .text(d => `${d.performance}%`);
-
+            .attr("y", d => yScale(d.performance) - 5);
     }
-
-    window.addEventListener("resize", () => {
-        const active = document.querySelector(".workload-btn.active");
-        if (active) updateChart(active.dataset.workload);
-    });
-
-    updateChart("gaming");
-    return updateChart;
+    updateChartFunction('gaming');
+    return updateChartFunction;
 }
 
 
@@ -813,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const quizHeader = document.querySelector('.quiz-header'); 
     const totalQuestionsSpan = document.getElementById('total-questions'); 
 
-    if (!quizPopup || !quizForm || !quizContent || !resultView) { 
+    if (!quizPopup || !quizContent || !resultView) { 
         console.error('Error: Quiz popup elements not found in DOM'); 
         return; 
     } 
@@ -849,18 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayResultCard(nama, score, rewardStatus) { 
         if (formContainer) { 
-            formContainer.innerHTML = ` 
-                <div class="quiz-result-card" style="text-align: center;"> 
-                    <h2 class="quiz-title">Anda sudah melakukan quiz, Terimakasih</h2> 
-                    <p style="margin-bottom: 10px;">${nama}</p> 
-                    <div class="score-circle" style="width: 100px; height: 100px; background: #6e8efb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px auto; color: white; font-size: 2.5rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"> 
-                        ${score} 
-                    </div> 
-                    <div style="display: inline-block; padding: 5px 15px; background: #e0f2f1; color: #00796b; border-radius: 20px; font-weight: bold;"> 
-                        ${rewardStatus} 
-                    </div> 
-                </div> 
-            `; 
+            formContainer.innerHTML = `<div class="quiz-result-card" style="text-align: center; width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box; padding: 20px;"><h2 class="quiz-title">Anda sudah melakukan quiz, Terimakasih</h2><p style="margin-bottom: 10px; word-break: break-word;">${nama}</p><div class="score-circle" style="width: 100px; height: 100px; background: #6e8efb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px auto; color: white; font-size: 2.5rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); flex-shrink: 0;">${score}</div><div style="display: inline-block; padding: 5px 15px; background: #e0f2f1; color: #00796b; border-radius: 20px; font-weight: bold; word-break: break-word; max-width: 90%;">${rewardStatus}</div></div>`; 
         } 
     } 
 
@@ -872,6 +762,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!namaInput || !emailInput || !whoInput || !tokenInput) { 
             console.error('Form inputs not found'); 
+            // Fallback: set result dengan data dari form meski token hilang
+            quizFinishedAndSaved = true;
+            savedQuizResult = {
+                nama: namaInput?.value || '',
+                score: finalScoreValue,
+                reward_status: finalScoreValue === 10 ? 'Hadiah Teh Kotak & Stiker' : (finalScoreValue >= 7 ? 'Hadiah Stiker' : 'Coba Lagi')
+            };
             return; 
         } 
 
@@ -892,10 +789,28 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => { 
             if (data && data.success) { 
                 savedQuizResult = data.data || null; 
-                quizFinishedAndSaved = true; 
+                quizFinishedAndSaved = true;
+                console.log('Quiz result saved:', savedQuizResult);
+            } else {
+                // Fallback jika success false tapi response valid
+                quizFinishedAndSaved = true;
+                savedQuizResult = {
+                    nama: payload.nama,
+                    score: finalScoreValue,
+                    reward_status: finalScoreValue === 10 ? 'Hadiah Teh Kotak & Stiker' : (finalScoreValue >= 7 ? 'Hadiah Stiker' : 'Coba Lagi')
+                };
             } 
         }) 
-        .catch(err => console.error('Save failed:', err)); 
+        .catch(err => { 
+            console.error('Save failed:', err);
+            // Fallback jika fetch gagal
+            quizFinishedAndSaved = true;
+            savedQuizResult = {
+                nama: payload.nama,
+                score: finalScoreValue,
+                reward_status: finalScoreValue === 10 ? 'Hadiah Teh Kotak & Stiker' : (finalScoreValue >= 7 ? 'Hadiah Stiker' : 'Coba Lagi')
+            };
+        }); 
     } 
 
     function startQuiz() { 
@@ -903,7 +818,6 @@ document.addEventListener('DOMContentLoaded', function() {
         score = 0; 
         isAnswering = false; 
         quizContent.style.display = 'block'; 
-        if (quizHeader) quizHeader.style.display = 'flex'; 
         resultView.style.display = 'none'; 
         loadQuestion(); 
     } 
@@ -1026,19 +940,47 @@ document.addEventListener('DOMContentLoaded', function() {
         closeQuizBtn.addEventListener('click', () => { 
             clearInterval(timerInterval); 
             hidePopup(); 
-            setTimeout(() => { 
-                if (quizFinishedAndSaved && savedQuizResult) { 
+            
+            // Tunggu sampai save response diterima atau timeout 2 detik
+            const maxWait = 2000;
+            const startTime = Date.now();
+            
+            const waitForResult = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                
+                if (quizFinishedAndSaved && savedQuizResult) {
+                    clearInterval(waitForResult);
+                    
                     const nama = savedQuizResult.nama || savedQuizResult.name || document.getElementById('nama')?.value || ''; 
                     const skor = savedQuizResult.score !== undefined ? savedQuizResult.score : (typeof score === 'number' ? score : 0); 
                     const reward = savedQuizResult.reward_status || savedQuizResult.rewardStatus || ''; 
+                    
                     displayResultCard(nama, skor, reward); 
+                    
                     const submitBtn = quizForm.querySelector('button[type="submit"]'); 
                     if (submitBtn) { 
                         submitBtn.disabled = true; 
                         submitBtn.innerText = 'Sudah Mengikuti Quiz'; 
                     } 
-                } 
-            }, 350); 
+                } else if (elapsed >= maxWait) {
+                    // Timeout: gunakan data dari lokal jika server belum respond
+                    clearInterval(waitForResult);
+                    
+                    if (quizFinishedAndSaved || savedQuizResult) {
+                        const nama = (savedQuizResult?.nama) || document.getElementById('nama')?.value || ''; 
+                        const skor = (savedQuizResult?.score) !== undefined ? savedQuizResult.score : score; 
+                        const reward = (savedQuizResult?.reward_status) || (score === 10 ? 'Hadiah Teh Kotak & Stiker' : (score >= 7 ? 'Hadiah Stiker' : 'Coba Lagi')); 
+                        
+                        displayResultCard(nama, skor, reward); 
+                        
+                        const submitBtn = quizForm.querySelector('button[type="submit"]'); 
+                        if (submitBtn) { 
+                            submitBtn.disabled = true; 
+                            submitBtn.innerText = 'Sudah Mengikuti Quiz'; 
+                        } 
+                    }
+                }
+            }, 100);
         }); 
     } 
 }); 
@@ -1185,32 +1127,40 @@ function initializeActiveNavigation() {
     }); 
 } 
 
-function initializeHamburgerMenu() { 
-    const hamburger = document.getElementById('hamburger'); 
-    const navLinks = document.querySelector('.nav-links'); 
+function initializeHamburgerMenu() {
+    const hamburger = document.getElementById('hamburger');
+    const navContainer = document.querySelector('.nav-container');
+    const navLinks = document.querySelector('.nav-links');
 
-    if (hamburger && navLinks) { 
-        hamburger.addEventListener('click', function() { 
-            navLinks.classList.toggle('active'); 
-            hamburger.classList.toggle('active'); 
-        }); 
+    if (!hamburger || !navLinks) return;
 
-        const navItems = navLinks.querySelectorAll('a'); 
-        navItems.forEach(item => { 
-            item.addEventListener('click', function() { 
-                navLinks.classList.remove('active'); 
-                hamburger.classList.remove('active'); 
-            }); 
-        }); 
+    // toggle menu
+    hamburger.addEventListener('click', function (e) {
+        e.stopPropagation(); // ⬅️ PENTING
+        if (hamburger.classList.contains('active')) {
+            hamburger.classList.remove('active');
+            navContainer.classList.remove('active');
+        } else {
+            hamburger.classList.add('active');
+            navContainer.classList.add('active');
+        }
+    });
 
-        document.addEventListener('click', function(event) { 
-            if (!hamburger.contains(event.target) && !navLinks.contains(event.target)) { 
-                navLinks.classList.remove('active'); 
-                hamburger.classList.remove('active'); 
-            } 
-        }); 
-    } 
-} 
+    // klik menu → tutup
+    navLinks.querySelectorAll('a').forEach(item => {
+        item.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navContainer.classList.remove('active');
+        });
+    });
+
+    // klik luar → tutup
+    document.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navContainer.classList.remove('active');
+    });
+}
+
 
 // ========================== 
 // EVENT LISTENERS 

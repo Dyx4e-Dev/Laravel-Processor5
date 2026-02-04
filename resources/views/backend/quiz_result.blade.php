@@ -36,7 +36,7 @@
             <tbody>
                 @forelse($results as $res)
                 <tr>
-                    <td style="color: var(--primary); font-weight: bold; text-align: center;">#{{ $loop->iteration }}</td>
+                    <td style="color: var(--primary); font-weight: bold; text-align: center;">{{ ($results->currentPage() - 1) * $results->perPage() + $loop->iteration }}</td>
                     <td>
                         <p style="font-weight: bold; margin: 0;">{{ $res->nama }}</p>
                     </td>
@@ -84,8 +84,8 @@
         </table>
     </div>
 
-    <div style="margin-top: 20px; display: flex; justify-content: center;">
-        {{ $results->links() }}
+    <div class="pagination-wrapper">
+        {{ $results->links('pagination::bootstrap-4') }} 
     </div>
 </div>
 @endsection
